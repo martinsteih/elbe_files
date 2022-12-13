@@ -1,0 +1,108 @@
+
+
+<ns0:RootFileSystem xmlns:ns0="https://www.linutronix.de/projects/Elbe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2009-05-20T08:50:56" revision="6" xsi:schemaLocation="https://www.linutronix.de/projects/Elbe dbsfed.xsd">
+<project>
+    <name>raspberrypi4b</name>
+    <version>1.0</version>
+    <description>
+        rootfs for raspberrypi
+    </description>
+    <buildtype>aarch64</buildtype>
+    <mirror>
+        <primary_host>ftp.de.debian.org</primary_host>
+        <primary_path>/debian</primary_path>
+        <primary_proto>http</primary_proto>
+    </mirror>
+    <suite>bullseye</suite>
+</project>
+<target>
+    <hostname>raspi</hostname>
+    <domain></domain>
+    <passwd_hashed>$6$rounds=656000$euPLfHaPenEMAzms$Ch9L0KznKOsVa54n23SlP41ndv0Zo6geSpMP0kgalZJ.RqlOmMusLQpJ5cetDH5slZQEjMvI9QXhlWlyntbyw1</passwd_hashed>
+    <console>ttyAMA0,115200</console>
+    <package>
+        <tar>
+            <name>rfs.tgz</name>
+        </tar>
+    </package>
+    <images>
+        <msdoshd>
+            <name>sdcard.img</name>
+            <size>14GiB</size>
+            <partition>
+                <size>80MiB</size>
+                <label>boot</label>
+                <bootable />
+            </partition>
+            <partition>
+                <size>remain</size>
+                <label>rfs</label>
+            </partition>
+        </msdoshd>
+    </images>
+    <fstab>
+        <bylabel>
+            <label>rfs</label>
+            <mountpoint>/</mountpoint>
+            <fs>
+                <type>ext4</type>
+                <tune2fs>-i 0</tune2fs>
+            </fs>
+        </bylabel>
+        <bylabel>
+            <label>boot</label>
+            <mountpoint>/boot</mountpoint>
+            <fs>
+                <type>vfat</type>
+            </fs>
+        </bylabel>
+    </fstab>
+    <finetuning>
+        <adduser passwd_hashed="$6$rounds=656000$xUjjJk2S4M4M3XVH$5enb0kR6sRgHaezBFR.DdYgV59rRO0tZkEwrrmYKJIxz/07Tdargqy11z2mDWteCZM28m2pz84W91hdzu90Kn0" create_home="true" shell="/bin/bash">elbe</adduser>
+        <file dst="/etc/network/interfaces" append="true">
+            auto eth0
+            alllow-hotplug eth0
+            iface eth0 inet dhcp
+        </file>
+        <file dst="/boot/config.txt">
+            over_voltage=6
+            arm_freq=2147
+            arm_64bit=1
+            kernel=u-boot.bin
+        </file>
+        <file dst="/boot/cmdline.txt">
+            console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles
+        </file>
+        <file dst="/boot/raspbi4b_boot.txt" mode="644">
+            ext4load mmc 0:2 $kernel_addr_r vmlinuz
+            ext4load mmc 0:2 $fdt_addr_r bcm2711-rpi-4-b.dtb
+            ext4load mmc 0:2 $ramdisk_addr_r initrd.img
+
+            setenv bootargs console=serial,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait quiet 
+
+            booti $kernel_addr_r $ramdisk_addr_r:$filesize $fdt_addr_r
+        </file>
+        <command>cp usr/lib/linux-image-$(uname -r)/broadcom/bcm2711-rpi-4-b.dtb /bcm2711-rpi-4-b.dtb</command>
+        <command>mkimage -T script -C none -n 'raspbi4b_boot script' -d /boot/raspbi4b_boot.txt /boot/raspbi4b_boot.scr</command>
+    </finetuning>
+    <pbuilder>
+        <git revision="main">https://github.com/martinsteih/helloworld.git</git>
+        <git revision="main">https://github.com/martinsteih/rpi4bfirmware.git</git>
+        <git revision="main">https://github.com/martinsteih/u-boot.git</git>
+        <git revision="main">https://github.com/martinsteih/dotnet-sdk-6.0.git</git>
+    </pbuilder>
+    <pkg-list>
+        <pkg>rpi4bfirmware</pkg>
+        <pkg>linux-image-rt-arm64</pkg>
+        <pkg>u-boot-image</pkg>
+        <pkg>u-boot-tools</pkg>
+        <pkg>sudo</pkg>
+        <pkg>openssh-server</pkg>
+        <pkg>git</pkg>
+        <pkg>nano</pkg>
+        <pkg>wget</pkg>
+        <pkg>dotnet-sdk-6</pkg>
+        <pkg>helloworld</pkg>
+    </pkg-list>
+</target>
+</ns0:RootFileSystem>

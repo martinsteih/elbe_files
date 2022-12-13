@@ -1,0 +1,73 @@
+
+
+<ns0:RootFileSystem xmlns:ns0="https://www.linutronix.de/projects/Elbe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2009-05-20T08:50:56" revision="6" xsi:schemaLocation="https://www.linutronix.de/projects/Elbe dbsfed.xsd">
+<project>
+    <name>raspberrypi4b</name>
+    <version>1.0</version>
+    <description>
+        rootfs for raspberrypi
+    </description>
+    <buildtype>aarch64</buildtype>
+    <mirror>
+        <primary_host>ftp.de.debian.org</primary_host>
+        <primary_path>/debian</primary_path>
+        <primary_proto>http</primary_proto>
+    </mirror>
+    <noauth />
+    <suite>bullseye</suite>
+</project>
+<target>
+    <hostname>raspi</hostname>
+    <domain></domain>
+    <passwd_hashed>$6$rounds=656000$euPLfHaPenEMAzms$Ch9L0KznKOsVa54n23SlP41ndv0Zo6geSpMP0kgalZJ.RqlOmMusLQpJ5cetDH5slZQEjMvI9QXhlWlyntbyw1</passwd_hashed>
+    <console>ttyAMA0,115200</console>
+    <images>
+        <msdoshd>
+            <name>sdcard.img</name>
+            <size>14GiB</size>
+            <partition>
+                <size>56MiB</size>
+                <label>boot</label>
+                <bootable />
+            </partition>
+            <partition>
+                <size>remain</size>
+                <label>rfs</label>
+            </partition>
+        </msdoshd>
+    </images>
+    <fstab>
+        <bylabel>
+            <label>rfs</label>
+            <mountpoint>/</mountpoint>
+            <fs>
+                <type>ext4</type>
+                <tune2fs>-i 0</tune2fs>
+            </fs>
+        </bylabel>
+        <bylabel>
+            <label>boot</label>
+            <mountpoint>/boot</mountpoint>
+            <fs>
+                <type>vfat</type>
+            </fs>
+        </bylabel>
+    </fstab>
+    <finetuning>
+        <adduser passwd_hashed="$6$rounds=656000$xUjjJk2S4M4M3XVH$5enb0kR6sRgHaezBFR.DdYgV59rRO0tZkEwrrmYKJIxz/07Tdargqy11z2mDWteCZM28m2pz84W91hdzu90Kn0" create_home="true" shell="/bin/bash">elbe</adduser>
+        <file dst="/etc/network/interfaces" append="true">
+            auto eth0
+            alllow-hotplug eth0
+            iface eth0 inet static
+                address 192.168.3.10
+                netmask 255.255.255.0
+        </file>
+    </finetuning>
+    <pkg-list>
+        <pkg>openssh-server</pkg>
+        <pkg>git</pkg>
+        <pkg>nano</pkg>
+        <pkg>wget</pkg>
+    </pkg-list>
+</target>
+</ns0:RootFileSystem>
